@@ -1,23 +1,22 @@
 module Piggybak
-  class Cart
-    attr_accessor :sellables
+  class Cart 
+    attr_accessor :items
     attr_accessor :total
     attr_accessor :errors
     attr_accessor :extra_data
     alias :subtotal :total
-    alias :items :sellables
   
     def initialize(cookie='')
-      self.sellables = []
+      self.items = []
       self.errors = []
       cookie ||= ''
       cookie.split(';').each do |item|
-        item_sellable = Piggybak::Sellable.find_by_id(item.split(':')[0])
+        item_sellable = Piggybak::Sellable.find_by_id((item.split(':')[0]).to_i)
         if item_sellable.present?
-          self.sellables << { :sellable => item_sellable, :quantity => (item.split(':')[1]).to_i }
+          self.items << { :sellable => item_sellable, :quantity => (item.split(':')[1]).to_i, :product_id => (item.split(':')[2]).to_i}
         end
       end
-      self.total = self.sellables.sum { |item| item[:quantity]*item[:sellable].price }
+      self.total = self.items.sum { |item| item[:quantity]*item[:sellable].price }
 
       self.extra_data = {}
     end
@@ -25,7 +24,7 @@ module Piggybak
     def self.to_hash(cookie)
       cookie ||= ''
       cookie.split(';').inject({}) do |hash, item|
-        hash[item.split(':')[0]] = (item.split(':')[1]).to_i
+        hash["#{(item.split(':')[0]).to_s}.#{(item.split(':')[2]).to_s}"] = (item.split(':')[1]).to_i
         hash
       end
     end
@@ -33,15 +32,15 @@ module Piggybak
     def self.to_string(cart)
       cookie = ''
       cart.each do |k, v|
-        cookie += "#{k.to_s}:#{v.to_s};" if v.to_i > 0
+        cookie += "#{(k.split('.')[0]).to_s}:#{v.to_s}:#{(k.split('.')[1]).to_s};" if v.to_i > 0
       end
       cookie
     end
 
     def self.add(cookie, params)
       cart = to_hash(cookie)
-      cart["#{params[:sellable_id]}"] ||= 0
-      cart["#{params[:sellable_id]}"] += params[:quantity].to_i
+      cart["#{params[:sellable_id]}.#{params[:product_id]}"] ||= 0
+      cart["#{params[:sellable_id]}.#{params[:product_id]}"] += params[:quantity].to_i
       to_string(cart)
     end
   
@@ -59,30 +58,30 @@ module Piggybak
  
     def to_cookie
       cookie = ''
-      self.sellables.each do |item|
-        cookie += "#{item[:sellable].id.to_s}:#{item[:quantity].to_s};" if item[:quantity].to_i > 0
+      self.items.each do |item|
+        cookie += "#{item[:sellable].id.to_s}:#{item[:quantity].to_s}:#{item[:product_id].to_s};" if item[:quantity].to_i > 0
       end
       cookie
     end
   
     def update_quantities
       self.errors = []
-      new_sellables = []
-      self.sellables.each do |item|
+      new_items = []
+      self.items.each do |item|
         if !item[:sellable].active
           self.errors << ["Sorry, #{item[:sellable].description} is no longer for sale"]
         elsif item[:sellable].unlimited_inventory || item[:sellable].quantity >= item[:quantity]
-          new_sellables << item
+          new_items << item
         elsif item[:sellable].quantity == 0
           self.errors << ["Sorry, #{item[:sellable].description} is no longer available"]
         else
           self.errors << ["Sorry, only #{item[:sellable].quantity} available for #{item[:sellable].description}"]
           item[:quantity] = item[:sellable].quantity
-          new_sellables << item if item[:quantity] > 0
+          new_items << item if item[:quantity] > 0
         end
       end
-      self.sellables = new_sellables
-      self.total = self.sellables.sum { |item| item[:quantity]*item[:sellable].price }
+      self.items = new_items
+      self.total = self.items.sum { |item| item[:quantity]*item[:sellable].price }
     end
 
     def set_extra_data(form_params)
