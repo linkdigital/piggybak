@@ -27,7 +27,7 @@ module Piggybak
 
     attr_accessible :user_id, :email, :phone, :billing_address_attributes, 
                     :shipping_address_attributes, :line_items_attributes,
-                    :order_notes_attributes, :details, :recorded_changer, :ip_address
+                    :order_notes_attributes, :details, :recorded_changer, :ip_address, :paypal_profile_id
                    
     def deliver_order_confirmation
       Piggybak::Notifier.order_notification(self).deliver

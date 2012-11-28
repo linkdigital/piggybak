@@ -8,6 +8,7 @@ Piggybak::Engine.routes.draw do
 
     # order actions
     root :to => 'orders#submit', :as => :orders, :via => [:get, :post]
+	match "/checkout" => "orders#submit", :as => :checkout
     match "/receipt" => "orders#receipt", :as => :receipt
     match "/orders/shipping" => "orders#shipping", :as => :orders_shipping
     match "/orders/tax" => "orders#tax", :as => :orders_tax

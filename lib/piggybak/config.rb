@@ -17,8 +17,6 @@ module Piggybak
       attr_accessor :extra_secure_paths
       attr_accessor :manage_classes
       attr_accessor :extra_abilities
-      attr_accessor :manage_classes
-      attr_accessor :extra_secure_paths
 
       def reset
         @manage_classes = ["::Piggybak::Sellable",
@@ -38,39 +36,31 @@ module Piggybak
         @shipping_calculators = ["::Piggybak::ShippingCalculator::FlatRate",
                                  "::Piggybak::ShippingCalculator::Free",
                                  "::Piggybak::ShippingCalculator::Range"]
-        @tax_calculators = ["::Piggybak::TaxCalculator::Percent"]
+        @tax_calculators = ["::Piggybak::TaxCalculator::Percent","::Piggybak::TaxCalculator::Hst"]
 
-        @line_item_types = {  :sellable => {            :visible => true,
-                                                        :fields => ["sellable_id", "quantity"],
-                                                        :allow_destroy => true,
-                                                        :sort => 1 },
-                              :payment => {             :visible => true,
-                                                        :nested_attrs => true,
-                                                        :fields => ["payment"],
-                                                        :allow_destroy => false,
-                                                        :class_name => "::Piggybak::Payment",
-                                                        :sort => 5 },
-                              :shipment => {            :visible => true, 
-                                                        :nested_attrs => true, 
-                                                        :fields => ["shipment"], 
-                                                        :allow_destroy => true,
-                                                        :class_name => "::Piggybak::Shipment", 
-                                                        :sort => 2 },
-                              :adjustment => {          :visible => true, 
-                                                        :fields => ["description", "price"],
-                                                        :allow_destroy => true,
-                                                        :sort => 4 },
-                              :tax => {                 :visible => false, 
-                                                        :allow_destroy => false,
-                                                        :sort => 3 },
-                              :coupon_application => {  :visible => true,
-                                                        :nested_attrs => true,
-                                                        :fields => ["coupon_application"],
-                                                        :allow_destroy => true,
-                                                        :reduce_tax_subtotal => true,
-                                                        :class_name => "::PiggybakCoupons::CouponApplication",
-                                                        :display_in_cart => "Discount",
-                                                        :sort => 6}
+        @line_item_types = { :sellable => { :visible => true,
+                                            :fields => ["sellable_id", "quantity"],
+                                            :allow_destroy => true,
+                                            :sort => 1 },
+                             :payment => { :visible => true,
+                                           :nested_attrs => true,
+                                           :fields => ["payment"],
+                                           :allow_destroy => false,
+                                           :class_name => "::Piggybak::Payment",
+                                           :sort => 5 },
+                             :shipment => { :visible => true, 
+                                            :nested_attrs => true, 
+                                            :fields => ["shipment"], 
+                                            :allow_destroy => true,
+                                            :class_name => "::Piggybak::Shipment", 
+                                            :sort => 2 },
+                             :adjustment => { :visible => true, 
+                                              :fields => ["description", "price"],
+                                              :allow_destroy => true,
+                                              :sort => 4 },
+                             :tax => { :visible => false, 
+                                       :allow_destroy => false,
+                                       :sort => 3 }
                            }
 
         @default_country = "US"
